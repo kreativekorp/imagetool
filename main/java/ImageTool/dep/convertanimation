@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+java -Dcom.kreative.arg0=convertanimation -cp /usr/local/lib/imagetool.jar com.kreative.imagetool.ConvertAnimation "$@"
