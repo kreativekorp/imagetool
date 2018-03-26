@@ -4,6 +4,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import com.kreative.imagetool.animation.Animation;
 import com.kreative.imagetool.animation.AnimationFrame;
+import com.kreative.imagetool.gci.GCIBlock;
+import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFFile;
 
 public class BackgroundColor implements Transform {
@@ -24,6 +26,13 @@ public class BackgroundColor implements Transform {
 		g.drawImage(image, null, 0, 0);
 		g.dispose();
 		return newImage;
+	}
+	
+	public GCIFile transform(GCIFile gci) {
+		for (GCIBlock block : gci.blocks) {
+			block.setImage(gci, transform(block.getImage(gci)));
+		}
+		return gci;
 	}
 	
 	public GIFFile transform(GIFFile gif) {

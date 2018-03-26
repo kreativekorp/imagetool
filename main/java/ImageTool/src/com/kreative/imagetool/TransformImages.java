@@ -1,18 +1,12 @@
 package com.kreative.imagetool;
 
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.imageio.ImageIO;
+import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFFile;
-import com.kreative.imagetool.gif.GIFFrameIterator;
 import com.kreative.imagetool.transform.Transform;
 import com.kreative.imagetool.transform.TransformParser;
 
@@ -109,26 +103,15 @@ public class TransformImages {
 		}
 		
 		public void processFile(File input) throws IOException {
-			Object o = readFile(input);
-			if (o instanceof GIFFile) {
-				GIFFile gif = (GIFFile)o;
-				for (Transform tx : transforms) {
-					gif = tx.transform(gif);
-				}
-				String fmt = format;
-				if (fmt.equalsIgnoreCase("auto")) fmt = "gif";
-				writeFile(gif, fmt, outputFile(input, fmt));
-			} else if (o instanceof BufferedImage) {
-				BufferedImage image = (BufferedImage)o;
-				for (Transform tx : transforms) {
-					image = tx.transform(image);
-				}
-				String fmt = format;
-				if (fmt.equalsIgnoreCase("auto")) fmt = "png";
-				ImageIO.write(image, fmt, outputFile(input, fmt));
-			} else {
-				throw new IOException("Unrecognized format");
+			Object o = ImageIO.readFile(input);
+			o = ImageIO.transform(o, transforms);
+			String fmt = format;
+			if (fmt.equalsIgnoreCase("auto")) {
+				if (o instanceof BufferedImage) fmt = "png";
+				if (o instanceof GCIFile) fmt = "gci";
+				if (o instanceof GIFFile) fmt = "gif";
 			}
+			ImageIO.writeFile(o, fmt, outputFile(input, fmt));
 		}
 		
 		private File outputFile(File inputFile, String fmt) {
@@ -146,50 +129,6 @@ public class TransformImages {
 				File outputFile = output;
 				output = null;
 				return outputFile;
-			}
-		}
-	}
-	
-	private static Object readFile(File f) throws IOException {
-		FileInputStream fin = new FileInputStream(f);
-		BufferedInputStream bin = new BufferedInputStream(fin);
-		byte[] m = new byte[6];
-		bin.mark(8);
-		bin.read(m);
-		bin.reset();
-		if (
-			m[0] == 'G' && m[1] == 'I' && m[2] == 'F' &&
-			m[3] == '8' && (m[4] == '7' || m[4] == '9') && m[5] == 'a'
-		) {
-			GIFFile gif = new GIFFile();
-			gif.read(new DataInputStream(bin));
-			bin.close();
-			fin.close();
-			return gif;
-		} else {
-			BufferedImage image = ImageIO.read(bin);
-			bin.close();
-			fin.close();
-			return image;
-		}
-	}
-	
-	private static void writeFile(GIFFile gif, String format, File output) throws IOException {
-		if (format.equalsIgnoreCase("gif")) {
-			FileOutputStream fout = new FileOutputStream(output);
-			DataOutputStream dout = new DataOutputStream(fout);
-			gif.write(dout);
-			dout.flush();
-			fout.flush();
-			dout.close();
-			fout.close();
-		} else {
-			GIFFrameIterator iter = new GIFFrameIterator(gif);
-			if (iter.hasNext()) {
-				BufferedImage image = iter.next().composedImage;
-				ImageIO.write(image, format, output);
-			} else {
-				throw new IOException("No GIF frames");
 			}
 		}
 	}

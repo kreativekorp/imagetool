@@ -3,6 +3,8 @@ package com.kreative.imagetool.transform;
 import java.awt.image.BufferedImage;
 import com.kreative.imagetool.animation.Animation;
 import com.kreative.imagetool.animation.AnimationFrame;
+import com.kreative.imagetool.gci.GCIBlock;
+import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFBlock;
 import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.gif.GIFImageDescriptor;
@@ -21,6 +23,13 @@ public abstract class ColorFilter implements Transform {
 		BufferedImage newImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 		newImage.setRGB(0, 0, w, h, pixels, 0, w);
 		return newImage;
+	}
+	
+	public GCIFile transform(GCIFile gci) {
+		for (GCIBlock block : gci.blocks) {
+			block.setImage(gci, transform(block.getImage(gci)));
+		}
+		return gci;
 	}
 	
 	public GIFFile transform(GIFFile gif) {

@@ -4,6 +4,7 @@ import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +12,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 import javax.swing.SwingConstants;
-
+import com.kreative.imagetool.gci.GCIBlock;
+import com.kreative.imagetool.gci.GCIFile;
+import com.kreative.imagetool.gci.GCIFrame;
+import com.kreative.imagetool.gci.GCIFrameIterator;
 import com.kreative.imagetool.gif.GIFApplicationExtension;
 import com.kreative.imagetool.gif.GIFDisposalMethod;
 import com.kreative.imagetool.gif.GIFFile;
@@ -25,6 +29,17 @@ import com.kreative.imagetool.transform.RemoveMargin;
 import com.kreative.imagetool.transform.Trim;
 
 public class AnimationIO implements SwingConstants {
+	public static Animation fromGCIFile(GCIFile gci) {
+		Animation a = new Animation(gci.width, gci.height);
+		double d = gci.delay / 1000.0;
+		GCIFrameIterator iter = new GCIFrameIterator(gci);
+		while (iter.hasNext()) {
+			GCIFrame frame = iter.next();
+			a.frames.add(new AnimationFrame(frame.image, d));
+		}
+		return a;
+	}
+	
 	public static Animation fromGIFFile(GIFFile gif) {
 		Animation a = new Animation(gif.width, gif.height);
 		GIFFrameIterator iter = new GIFFrameIterator(gif);
@@ -67,6 +82,50 @@ public class AnimationIO implements SwingConstants {
 		CanvasSize s = new CanvasSize(a.width, a.height, anchor);
 		for (AnimationFrame f : a.frames) f.image = s.transform(f.image);
 		return a;
+	}
+	
+	public static GCIFile toGCIFile(Animation a) {
+		GCIFile gci = new GCIFile();
+		gci.width = a.width;
+		gci.height = a.height;
+		int n = a.frames.size();
+		if (n < 2) {
+			gci.delay = 0;
+			for (AnimationFrame af : a.frames) {
+				GCIBlock block = new GCIBlock();
+				block.setImage(gci, af.image);
+				gci.blocks.add(block);
+			}
+		} else {
+			int[] delays = new int[n];
+			delays[0] = (int)Math.round(a.frames.get(0).duration * 1000);
+			if (delays[0] < 1) delays[0] = 1;
+			BigInteger bigDelayBase = BigInteger.valueOf(delays[0]);
+			for (int i = 1; i < n; i++) {
+				delays[i] = (int)Math.round(a.frames.get(i).duration * 1000);
+				if (delays[i] < 1) delays[i] = 1;
+				bigDelayBase = bigDelayBase.gcd(BigInteger.valueOf(delays[i]));
+			}
+			int delayBase = bigDelayBase.intValue();
+			if (delayBase > 255) {
+				for (int i = 2; i <= delayBase; i++) {
+					if ((delayBase % i) == 0 && (delayBase / i) < 256) {
+						delayBase /= i;
+						break;
+					}
+				}
+			}
+			gci.delay = delayBase;
+			for (int i = 0; i < n; i++) {
+				AnimationFrame af = a.frames.get(i);
+				for (int j = delays[i] / delayBase; j > 0; j--) {
+					GCIBlock block = new GCIBlock();
+					block.setImage(gci, af.image);
+					gci.blocks.add(block);
+				}
+			}
+		}
+		return gci;
 	}
 	
 	public static GIFFile toGIFFile(Animation a, int repeat) {

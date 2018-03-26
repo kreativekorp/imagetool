@@ -6,6 +6,8 @@ public class ImageTool {
 			printHelp();
 		} else if (args[0].equalsIgnoreCase("ls") || args[0].equalsIgnoreCase("ListImages")) {
 			ListImages.main(args1(args));
+		} else if (args[0].equalsIgnoreCase("vi") || args[0].equalsIgnoreCase("ViewImages")) {
+			ViewImages.main(args1(args));
 		} else if (args[0].equalsIgnoreCase("tx") || args[0].equalsIgnoreCase("TransformImages")) {
 			TransformImages.main(args1(args));
 		} else if (args[0].equalsIgnoreCase("ca") || args[0].equalsIgnoreCase("ConvertAnimation")) {
@@ -23,6 +25,10 @@ public class ImageTool {
 		System.out.println("ImageTool ListImages <paths>");
 		System.out.println("    List images with their dimensions.");
 		System.out.println();
+		System.out.println("ImageTool vi <paths>");
+		System.out.println("ImageTool ViewImages <paths>");
+		System.out.println("    View images in windows.");
+		System.out.println();
 		System.out.println("ImageTool tx <options> <images>");
 		System.out.println("ImageTool TransformImages <options> <images>");
 		System.out.println("    Perform simple transformations on images and animated GIFs.");
@@ -34,6 +40,7 @@ public class ImageTool {
 		System.out.println("For more help, pass --help to a subcommand, e.g.:");
 		System.out.println();
 		System.out.println("ImageTool ListImages --help");
+		System.out.println("ImageTool ViewImages --help");
 		System.out.println("ImageTool TransformImages --help");
 		System.out.println("ImageTool ConvertAnimation --help");
 		System.out.println();

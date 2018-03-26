@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.kreative.imagetool.animation.Animation;
 import com.kreative.imagetool.animation.AnimationFrame;
+import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.gif.GIFFrameIterator;
 
@@ -27,6 +28,11 @@ public class Trim implements Transform {
 			bottom ? i.bottom : 0,
 			right ? i.right : 0
 		).transform(image);
+	}
+	
+	public GCIFile transform(GCIFile gci) {
+		// Not supported for GCIs.
+		return gci;
 	}
 	
 	public GIFFile transform(GIFFile gif) {

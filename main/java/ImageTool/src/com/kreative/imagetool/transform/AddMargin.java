@@ -6,6 +6,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import com.kreative.imagetool.animation.Animation;
 import com.kreative.imagetool.animation.AnimationFrame;
+import com.kreative.imagetool.gci.GCIBlock;
+import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFBlock;
 import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.gif.GIFImageDescriptor;
@@ -37,6 +39,17 @@ public class AddMargin implements Transform {
 		g.drawImage(image, null, left, top);
 		g.dispose();
 		return newImage;
+	}
+	
+	public GCIFile transform(GCIFile gci) {
+		gci.width += (left + right);
+		gci.height += (top + bottom);
+		if (gci.width < 1) gci.width = 1;
+		if (gci.height < 1) gci.height = 1;
+		for (GCIBlock block : gci.blocks) {
+			block.setImage(gci, transform(block.getImage(gci)));
+		}
+		return gci;
 	}
 	
 	public GIFFile transform(GIFFile gif) {

@@ -6,6 +6,8 @@ import java.io.IOException;
 import javax.swing.SwingConstants;
 import com.kreative.imagetool.animation.Animation;
 import com.kreative.imagetool.animation.AnimationFrame;
+import com.kreative.imagetool.gci.GCIBlock;
+import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFBlock;
 import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.gif.GIFImageDescriptor;
@@ -31,6 +33,15 @@ public class CanvasSize implements Transform, SwingConstants {
 		);
 		g.dispose();
 		return newImage;
+	}
+	
+	public GCIFile transform(GCIFile gci) {
+		gci.width = width;
+		gci.height = height;
+		for (GCIBlock block : gci.blocks) {
+			block.setImage(gci, transform(block.getImage(gci)));
+		}
+		return gci;
 	}
 	
 	public GIFFile transform(GIFFile gif) {

@@ -3,6 +3,7 @@ package com.kreative.imagetool.transform;
 import java.awt.image.BufferedImage;
 import com.kreative.imagetool.animation.Animation;
 import com.kreative.imagetool.animation.AnimationFrame;
+import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFBlock;
 import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.gif.GIFGraphicControlExtension;
@@ -18,6 +19,14 @@ public class Speed implements Transform {
 	public BufferedImage transform(BufferedImage image) {
 		// Not supported for static images.
 		return image;
+	}
+	
+	public GCIFile transform(GCIFile gci) {
+		if (gci.delay > 0) {
+			gci.delay = (int)Math.round(gci.delay / x);
+			if (gci.delay < 1) gci.delay = 1;
+		}
+		return gci;
 	}
 	
 	public GIFFile transform(GIFFile gif) {

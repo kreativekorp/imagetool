@@ -40,6 +40,8 @@ install: imagetool.jar
 	sudo chmod -f 755 /usr/local/bin/imagetool
 	sudo cp -i dep/listimages /usr/local/bin/
 	sudo chmod -f 755 /usr/local/bin/listimages
+	sudo cp -i dep/viewimages /usr/local/bin/
+	sudo chmod -f 755 /usr/local/bin/viewimages
 	sudo cp -i dep/transformimages /usr/local/bin/
 	sudo chmod -f 755 /usr/local/bin/transformimages
 	sudo cp -i dep/convertanimation /usr/local/bin/
@@ -48,6 +50,7 @@ install: imagetool.jar
 uninstall:
 	if [ -f /usr/local/bin/imagetool ]; then sudo rm -i /usr/local/bin/imagetool; fi
 	if [ -f /usr/local/bin/listimages ]; then sudo rm -i /usr/local/bin/listimages; fi
+	if [ -f /usr/local/bin/viewimages ]; then sudo rm -i /usr/local/bin/viewimages; fi
 	if [ -f /usr/local/bin/transformimages ]; then sudo rm -i /usr/local/bin/transformimages; fi
 	if [ -f /usr/local/bin/convertanimation ]; then sudo rm -i /usr/local/bin/convertanimation; fi
 	if [ -f /usr/local/bin/imagetool.jar ]; then sudo rm -i /usr/local/bin/imagetool.jar; fi

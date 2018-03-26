@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import com.kreative.imagetool.animation.Animation;
 import com.kreative.imagetool.animation.AnimationFrame;
+import com.kreative.imagetool.gci.GCIBlock;
+import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFBlock;
 import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.gif.GIFGraphicControlExtension;
@@ -24,6 +26,18 @@ public class ScaleDouble implements Transform {
 		if (nw < 1) nw = 1;
 		if (nh < 1) nh = 1;
 		return new ImageSize(nw, nh).transform(image);
+	}
+	
+	public GCIFile transform(GCIFile gci) {
+		gci.width = (int)Math.round(gci.width * sx);
+		gci.height = (int)Math.round(gci.height * sy);
+		if (gci.width < 1) gci.width = 1;
+		if (gci.height < 1) gci.height = 1;
+		ImageSize r = new ImageSize(gci.width, gci.height);
+		for (GCIBlock block : gci.blocks) {
+			block.setImage(gci, r.transform(block.getImage(gci)));
+		}
+		return gci;
 	}
 	
 	public GIFFile transform(GIFFile gif) {
@@ -56,7 +70,9 @@ public class ScaleDouble implements Transform {
 		if (a.width < 1) a.width = 1;
 		if (a.height < 1) a.height = 1;
 		ImageSize r = new ImageSize(a.width, a.height);
-		for (AnimationFrame f : a.frames) f.image = r.transform(f.image);
+		for (AnimationFrame f : a.frames) {
+			f.image = r.transform(f.image);
+		}
 		return a;
 	}
 }

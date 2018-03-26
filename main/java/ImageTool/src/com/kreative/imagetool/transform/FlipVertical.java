@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import com.kreative.imagetool.animation.Animation;
 import com.kreative.imagetool.animation.AnimationFrame;
+import com.kreative.imagetool.gci.GCIBlock;
+import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFBlock;
 import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.gif.GIFImageDescriptor;
@@ -24,6 +26,13 @@ public class FlipVertical implements Transform {
 		
 		image.setRGB(0, 0, w, h, slexip, 0, w);
 		return image;
+	}
+	
+	public GCIFile transform(GCIFile gci) {
+		for (GCIBlock block : gci.blocks) {
+			block.setImage(gci, transform(block.getImage(gci)));
+		}
+		return gci;
 	}
 	
 	public GIFFile transform(GIFFile gif) {

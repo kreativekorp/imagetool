@@ -8,6 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GIFFile {
+	public static boolean matchMagic(byte[] m) {
+		return (
+			m[0] == 'G' && m[1] == 'I' && m[2] == 'F' &&
+			m[3] == '8' && (m[4] == '7' || m[4] == '9') && m[5] == 'a'
+		);
+	}
+	
 	public boolean version89a = true;
 	public int width = 0;
 	public int height = 0;

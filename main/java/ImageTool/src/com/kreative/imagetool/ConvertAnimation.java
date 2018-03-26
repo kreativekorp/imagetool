@@ -1,22 +1,14 @@
 package com.kreative.imagetool;
 
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.imageio.ImageIO;
-
 import com.kreative.imagetool.animation.Animation;
 import com.kreative.imagetool.animation.AnimationIO;
 import com.kreative.imagetool.animation.ArrayOptions;
 import com.kreative.imagetool.animation.Range;
-import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.transform.Transform;
 import com.kreative.imagetool.transform.TransformParser;
 
@@ -195,26 +187,11 @@ public class ConvertAnimation {
 		if (f.isDirectory()) {
 			return AnimationIO.fromDirectory(f, anchor);
 		} else {
-			FileInputStream fin = new FileInputStream(f);
-			BufferedInputStream bin = new BufferedInputStream(fin);
-			byte[] m = new byte[6];
-			bin.mark(8);
-			bin.read(m);
-			bin.reset();
-			if (
-				m[0] == 'G' && m[1] == 'I' && m[2] == 'F' &&
-				m[3] == '8' && (m[4] == '7' || m[4] == '9') && m[5] == 'a'
-			) {
-				GIFFile gif = new GIFFile();
-				gif.read(new DataInputStream(bin));
-				bin.close();
-				fin.close();
-				return AnimationIO.fromGIFFile(gif);
+			Object image = ImageIO.readFile(f);
+			if (image instanceof BufferedImage) {
+				return AnimationIO.fromImageArray((BufferedImage)image, o);
 			} else {
-				BufferedImage image = ImageIO.read(bin);
-				bin.close();
-				fin.close();
-				return AnimationIO.fromImageArray(image, o);
+				return ImageIO.toAnimation(image);
 			}
 		}
 	}
@@ -222,18 +199,11 @@ public class ConvertAnimation {
 	private static void writeFile(Animation a, String format, ArrayOptions o, int repeat, File output) throws IOException {
 		if (format.equalsIgnoreCase("d") || format.equalsIgnoreCase("dir") || format.equalsIgnoreCase("directory")) {
 			AnimationIO.toDirectory(a, output);
-		} else if (format.equalsIgnoreCase("gif")) {
-			GIFFile gif = AnimationIO.toGIFFile(a, repeat);
-			FileOutputStream fout = new FileOutputStream(output);
-			DataOutputStream dout = new DataOutputStream(fout);
-			gif.write(dout);
-			dout.flush();
-			fout.flush();
-			dout.close();
-			fout.close();
+		} else if (format.equalsIgnoreCase("gci") || format.equalsIgnoreCase("gif")) {
+			ImageIO.writeFile(a, format, output);
 		} else {
 			BufferedImage image = AnimationIO.toImageArray(a, null, o);
-			ImageIO.write(image, format, output);
+			ImageIO.writeFile(image, format, output);
 		}
 	}
 }

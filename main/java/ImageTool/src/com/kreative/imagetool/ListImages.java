@@ -3,12 +3,8 @@ package com.kreative.imagetool;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import javax.imageio.ImageIO;
+import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFBlock;
 import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.gif.GIFImageDescriptor;
@@ -85,18 +81,32 @@ public class ListImages {
 				}
 			}
 		} else try {
-			FileInputStream fin = new FileInputStream(f);
-			InputStream in = new BufferedInputStream(fin);
-			byte[] m = new byte[6];
-			in.mark(8);
-			in.read(m);
-			in.reset();
-			if (
-				m[0] == 'G' && m[1] == 'I' && m[2] == 'F' &&
-				m[3] == '8' && (m[4] == '7' || m[4] == '9') && m[5] == 'a'
-			) {
-				GIFFile gif = new GIFFile();
-				gif.read(new DataInputStream(in));
+			Object image = ImageIO.readFile(f);
+			if (image instanceof BufferedImage) {
+				BufferedImage bi = (BufferedImage)image;
+				Insets margin = Trim.getMargin(bi);
+				dataPoint(
+					bi.getWidth(), bi.getHeight(),
+					margin.top, margin.left,
+					margin.bottom, margin.right
+				);
+				System.out.println(
+					bi.getWidth() + "\t" + bi.getHeight() + "\t" +
+					margin.left + "\t" + margin.top + "\t" +
+					margin.right + "\t" + margin.bottom + "\t\t" +
+					prefix + f.getName()
+				);
+			}
+			if (image instanceof GCIFile) {
+				GCIFile gci = (GCIFile)image;
+				dataPoint(gci.width, gci.height, 0, 0, 0, 0);
+				System.out.println(
+					gci.width + "\t" + gci.height + "\t0\t0\t0\t0\t" +
+					gci.blocks.size() + "\t" + prefix + f.getName()
+				);
+			}
+			if (image instanceof GIFFile) {
+				GIFFile gif = (GIFFile)image;
 				Insets margin = Trim.getMargin(gif);
 				int count = 0;
 				for (GIFBlock block : gif.blocks) {
@@ -115,26 +125,7 @@ public class ListImages {
 					margin.right + "\t" + margin.bottom + "\t" +
 					count + "\t" + prefix + f.getName()
 				);
-			} else {
-				BufferedImage image = ImageIO.read(in);
-				if (image != null) {
-					Insets margin = Trim.getMargin(image);
-					dataPoint(
-						image.getWidth(), image.getHeight(),
-						margin.top, margin.left,
-						margin.bottom, margin.right
-					);
-					System.out.println(
-						image.getWidth() + "\t" + image.getHeight() + "\t" +
-						margin.left + "\t" + margin.top + "\t" +
-						margin.right + "\t" + margin.bottom + "\t\t" +
-						prefix + f.getName()
-					);
-				}
 			}
-			
-			in.close();
-			fin.close();
 		} catch (Exception e) {
 			// This space intentionally left blank.
 		}
