@@ -196,6 +196,16 @@ public class GIFFile {
 		}
 	}
 	
+	public int getRepeatCount() {
+		for (GIFBlock block : blocks) {
+			if (block instanceof GIFApplicationExtension) {
+				GIFApplicationExtension gae = (GIFApplicationExtension)block;
+				if (gae.isNAB()) return gae.getRepeatCount();
+			}
+		}
+		return 1;
+	}
+	
 	private static int exp(int size) {
 		return (1 << (size + 1));
 	}

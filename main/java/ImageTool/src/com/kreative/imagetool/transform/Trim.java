@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import com.kreative.imagetool.animation.Animation;
 import com.kreative.imagetool.animation.AnimationFrame;
+import com.kreative.imagetool.animation.AnimationIO;
 import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.gif.GIFFrameIterator;
+import com.kreative.imagetool.smf.SMFFile;
 
 public class Trim implements Transform {
 	private final boolean top, left, bottom, right;
@@ -31,8 +33,8 @@ public class Trim implements Transform {
 	}
 	
 	public GCIFile transform(GCIFile gci) {
-		// Not supported for GCIs.
-		return gci;
+		Animation a = transform(AnimationIO.fromGCIFile(gci));
+		return AnimationIO.toGCIFile(a);
 	}
 	
 	public GIFFile transform(GIFFile gif) {
@@ -43,6 +45,11 @@ public class Trim implements Transform {
 			bottom ? i.bottom : 0,
 			right ? i.right : 0
 		).transform(gif);
+	}
+	
+	public SMFFile transform(SMFFile smf) {
+		Animation a = transform(AnimationIO.fromSMFFile(smf));
+		return AnimationIO.toSMFFile(a, smf.isRepeating());
 	}
 	
 	public Animation transform(Animation a) {

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFFile;
+import com.kreative.imagetool.smf.SMFFile;
 import com.kreative.imagetool.transform.Transform;
 import com.kreative.imagetool.transform.TransformParser;
 
@@ -110,6 +111,7 @@ public class TransformImages {
 				if (o instanceof BufferedImage) fmt = "png";
 				if (o instanceof GCIFile) fmt = "gci";
 				if (o instanceof GIFFile) fmt = "gif";
+				if (o instanceof SMFFile) fmt = "smf";
 			}
 			ImageIO.writeFile(o, fmt, outputFile(input, fmt));
 		}

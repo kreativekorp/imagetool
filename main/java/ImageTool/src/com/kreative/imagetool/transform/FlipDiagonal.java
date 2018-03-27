@@ -9,6 +9,11 @@ import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFBlock;
 import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.gif.GIFImageDescriptor;
+import com.kreative.imagetool.smf.SMFAllocateDirective;
+import com.kreative.imagetool.smf.SMFDirective;
+import com.kreative.imagetool.smf.SMFFile;
+import com.kreative.imagetool.smf.SMFFillDirective;
+import com.kreative.imagetool.smf.SMFPushDirective;
 
 public class FlipDiagonal implements Transform {
 	public BufferedImage transform(BufferedImage image) {
@@ -78,6 +83,41 @@ public class FlipDiagonal implements Transform {
 			}
 		}
 		return gif;
+	}
+	
+	public SMFFile transform(SMFFile smf) {
+		int nw = 128, nh = 128;
+		for (SMFDirective dir : smf.directives) {
+			if (dir instanceof SMFAllocateDirective) {
+				SMFAllocateDirective a = (SMFAllocateDirective)dir;
+				nw = a.height;
+				nh = a.width;
+				a.width = nw;
+				a.height = nh;
+			} else if (dir instanceof SMFFillDirective) {
+				SMFFillDirective f = (SMFFillDirective)dir;
+				int dx = f.y;
+				int dy = f.x;
+				int dw = f.height;
+				int dh = f.width;
+				f.x = dx;
+				f.y = dy;
+				f.width = dw;
+				f.height = dh;
+			} else if (dir instanceof SMFPushDirective) {
+				SMFPushDirective p = (SMFPushDirective)dir;
+				int dx = p.y;
+				int dy = p.x;
+				int dw = p.height;
+				int dh = p.width;
+				p.setImage(transform(p.getImage()));
+				p.x = dx;
+				p.y = dy;
+				p.width = dw;
+				p.height = dh;
+			}
+		}
+		return smf;
 	}
 	
 	public Animation transform(Animation a) {

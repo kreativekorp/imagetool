@@ -24,11 +24,30 @@ import com.kreative.imagetool.gif.GIFFrameIterator;
 import com.kreative.imagetool.gif.GIFGraphicControlExtension;
 import com.kreative.imagetool.gif.GIFImageDescriptor;
 import com.kreative.imagetool.gif.Histogram;
+import com.kreative.imagetool.smf.SMFAllocateDirective;
+import com.kreative.imagetool.smf.SMFDirective;
+import com.kreative.imagetool.smf.SMFFile;
+import com.kreative.imagetool.smf.SMFFrame;
+import com.kreative.imagetool.smf.SMFFrameIterator;
+import com.kreative.imagetool.smf.SMFHaltDirective;
+import com.kreative.imagetool.smf.SMFNextDirective;
+import com.kreative.imagetool.smf.SMFPushDirective;
+import com.kreative.imagetool.smf.SMFSeekDirective;
+import com.kreative.imagetool.smf.SMFWaitDirective;
 import com.kreative.imagetool.transform.CanvasSize;
 import com.kreative.imagetool.transform.RemoveMargin;
 import com.kreative.imagetool.transform.Trim;
 
 public class AnimationIO implements SwingConstants {
+	public static Animation fromObject(Object image) {
+		if (image instanceof Animation) return (Animation)image;
+		if (image instanceof GCIFile) return fromGCIFile((GCIFile)image);
+		if (image instanceof GIFFile) return fromGIFFile((GIFFile)image);
+		if (image instanceof SMFFile) return fromSMFFile((SMFFile)image);
+		if (image instanceof BufferedImage) return fromBufferedImage((BufferedImage)image);
+		return null;
+	}
+	
 	public static Animation fromGCIFile(GCIFile gci) {
 		Animation a = new Animation(gci.width, gci.height);
 		double d = gci.delay / 1000.0;
@@ -48,6 +67,28 @@ public class AnimationIO implements SwingConstants {
 			double d = (frame.gce != null) ? (frame.gce.delayTime / 100.0) : 1;
 			a.frames.add(new AnimationFrame(frame.composedImage, d));
 		}
+		return a;
+	}
+	
+	public static Animation fromSMFFile(SMFFile smf) {
+		Animation a = null;
+		SMFFrameIterator iter = new SMFFrameIterator(smf);
+		while (iter.hasNext()) {
+			SMFFrame frame = iter.next();
+			if (a == null) {
+				int w = frame.image.getWidth();
+				int h = frame.image.getHeight();
+				a = new Animation(w, h);
+			}
+			double d = frame.delay / 1000.0;
+			a.frames.add(new AnimationFrame(frame.image, d));
+		}
+		return a;
+	}
+	
+	public static Animation fromBufferedImage(BufferedImage image) {
+		Animation a = new Animation(image.getWidth(), image.getHeight());
+		a.frames.add(new AnimationFrame(image, 0));
 		return a;
 	}
 	
@@ -179,6 +220,79 @@ public class AnimationIO implements SwingConstants {
 		}
 		
 		return gif;
+	}
+	
+	public static SMFFile toSMFFile(Animation a, boolean repeat) {
+		SMFFile smf = new SMFFile();
+		// directive to allocate screen
+		SMFDirective dir = new SMFAllocateDirective(a.width, a.height);
+		int ptr = dir.opLength() + dir.dataLength();
+		BufferedImage last = null;
+		int secondFrameSector = 0;
+		smf.directives.add(dir);
+		// loop through frames
+		for (int i = 0, n = a.frames.size(); i < n; i++) {
+			AnimationFrame af = a.frames.get(i);
+			// directive to push frame
+			SMFPushDirective p = new SMFPushDirective();
+			if (last == null) p.setImage(af.image);
+			else p.setImageDiff(last, af.image);
+			ptr += p.opLength() + p.dataLength();
+			last = af.image;
+			smf.directives.add(p);
+			if (i + 1 < n) {
+				// not the last frame; add delay
+				int dur = (int)Math.round(af.duration * 1000);
+				dir = new SMFWaitDirective((dur > 1) ? dur : 1);
+				ptr += dir.opLength() + dir.dataLength();
+				smf.directives.add(dir);
+				if (i == 0) {
+					// the first frame; record start of second frame
+					if ((ptr & 0x1FF) != 0) {
+						dir = new SMFNextDirective();
+						ptr += 512 - (ptr & 0x1FF);
+						smf.directives.add(dir);
+					}
+					secondFrameSector = ptr >> 9;
+				}
+			} else {
+				// the last frame
+				if (i == 0 || !repeat) {
+					// static image or non-repeating animation; halt
+					dir = new SMFHaltDirective();
+					ptr += 512 - (ptr & 0x1FF);
+					smf.directives.add(dir);
+				} else {
+					// add delay for last frame
+					int dur = (int)Math.round(af.duration * 1000);
+					dir = new SMFWaitDirective((dur > 1) ? dur : 1);
+					ptr += dir.opLength() + dir.dataLength();
+					smf.directives.add(dir);
+					// directive to push first frame
+					af = a.frames.get(0);
+					p = new SMFPushDirective();
+					p.setImageDiff(last, af.image);
+					ptr += p.opLength() + p.dataLength();
+					last = af.image;
+					smf.directives.add(p);
+					// add delay for first frame
+					dur = (int)Math.round(af.duration * 1000);
+					dir = new SMFWaitDirective((dur > 1) ? dur : 1);
+					ptr += dir.opLength() + dir.dataLength();
+					smf.directives.add(dir);
+					// seek to second frame
+					dir = new SMFSeekDirective(secondFrameSector);
+					ptr += 512 - (ptr & 0x1FF);
+					smf.directives.add(dir);
+				}
+			}
+		}
+		return smf;
+	}
+	
+	public static BufferedImage toBufferedImage(Animation a) {
+		for (AnimationFrame af : a.frames) return af.image;
+		return null;
 	}
 	
 	public static BufferedImage toImageArray(Animation a, BufferedImage image, ArrayOptions o) {

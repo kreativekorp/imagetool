@@ -4,11 +4,13 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import com.kreative.imagetool.animation.Animation;
 import com.kreative.imagetool.animation.AnimationFrame;
+import com.kreative.imagetool.animation.AnimationIO;
 import com.kreative.imagetool.gci.GCIBlock;
 import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFBlock;
 import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.gif.GIFImageDescriptor;
+import com.kreative.imagetool.smf.SMFFile;
 
 public class ScaleInteger implements Transform {
 	private final int sx, sy;
@@ -88,6 +90,11 @@ public class ScaleInteger implements Transform {
 			}
 		}
 		return gif;
+	}
+	
+	public SMFFile transform(SMFFile smf) {
+		Animation a = transform(AnimationIO.fromSMFFile(smf));
+		return AnimationIO.toSMFFile(a, smf.isRepeating());
 	}
 	
 	public Animation transform(Animation a) {

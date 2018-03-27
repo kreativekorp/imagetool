@@ -4,6 +4,8 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import com.kreative.imagetool.animation.Animation;
+import com.kreative.imagetool.animation.AnimationIO;
 import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFBlock;
 import com.kreative.imagetool.gif.GIFFile;
@@ -96,16 +98,14 @@ public class ListImages {
 					margin.right + "\t" + margin.bottom + "\t\t" +
 					prefix + f.getName()
 				);
-			}
-			if (image instanceof GCIFile) {
+			} else if (image instanceof GCIFile) {
 				GCIFile gci = (GCIFile)image;
 				dataPoint(gci.width, gci.height, 0, 0, 0, 0);
 				System.out.println(
 					gci.width + "\t" + gci.height + "\t0\t0\t0\t0\t" +
 					gci.blocks.size() + "\t" + prefix + f.getName()
 				);
-			}
-			if (image instanceof GIFFile) {
+			} else if (image instanceof GIFFile) {
 				GIFFile gif = (GIFFile)image;
 				Insets margin = Trim.getMargin(gif);
 				int count = 0;
@@ -125,6 +125,23 @@ public class ListImages {
 					margin.right + "\t" + margin.bottom + "\t" +
 					count + "\t" + prefix + f.getName()
 				);
+			} else {
+				Animation a = AnimationIO.fromObject(image);
+				if (a != null) {
+					Insets margin = Trim.getMargin(a);
+					int count = a.frames.size();
+					dataPoint(
+						a.width, a.height,
+						margin.top, margin.left,
+						margin.bottom, margin.right
+					);
+					System.out.println(
+						a.width + "\t" + a.height + "\t" +
+						margin.left + "\t" + margin.top + "\t" +
+						margin.right + "\t" + margin.bottom + "\t" +
+						count + "\t" + prefix + f.getName()
+					);
+				}
 			}
 		} catch (Exception e) {
 			// This space intentionally left blank.

@@ -7,6 +7,9 @@ import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFBlock;
 import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.gif.GIFGraphicControlExtension;
+import com.kreative.imagetool.smf.SMFDirective;
+import com.kreative.imagetool.smf.SMFFile;
+import com.kreative.imagetool.smf.SMFWaitDirective;
 
 public class Speed implements Transform {
 	private final double x;
@@ -37,6 +40,16 @@ public class Speed implements Transform {
 			}
 		}
 		return gif;
+	}
+	
+	public SMFFile transform(SMFFile smf) {
+		for (SMFDirective dir : smf.directives) {
+			if (dir instanceof SMFWaitDirective) {
+				SMFWaitDirective w = (SMFWaitDirective)dir;
+				w.delay = (int)Math.round(w.delay / x);
+			}
+		}
+		return smf;
 	}
 	
 	public Animation transform(Animation a) {

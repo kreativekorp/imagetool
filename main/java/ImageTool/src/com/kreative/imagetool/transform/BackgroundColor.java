@@ -4,9 +4,11 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import com.kreative.imagetool.animation.Animation;
 import com.kreative.imagetool.animation.AnimationFrame;
+import com.kreative.imagetool.animation.AnimationIO;
 import com.kreative.imagetool.gci.GCIBlock;
 import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFFile;
+import com.kreative.imagetool.smf.SMFFile;
 
 public class BackgroundColor implements Transform {
 	private final int color;
@@ -36,8 +38,13 @@ public class BackgroundColor implements Transform {
 	}
 	
 	public GIFFile transform(GIFFile gif) {
-		// Not supported for GIFs.
-		return gif;
+		Animation a = transform(AnimationIO.fromGIFFile(gif));
+		return AnimationIO.toGIFFile(a, gif.getRepeatCount());
+	}
+	
+	public SMFFile transform(SMFFile smf) {
+		Animation a = transform(AnimationIO.fromSMFFile(smf));
+		return AnimationIO.toSMFFile(a, smf.isRepeating());
 	}
 	
 	public Animation transform(Animation a) {

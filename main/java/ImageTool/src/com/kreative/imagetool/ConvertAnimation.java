@@ -1,7 +1,9 @@
 package com.kreative.imagetool;
 
 import java.awt.image.BufferedImage;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +11,9 @@ import com.kreative.imagetool.animation.Animation;
 import com.kreative.imagetool.animation.AnimationIO;
 import com.kreative.imagetool.animation.ArrayOptions;
 import com.kreative.imagetool.animation.Range;
+import com.kreative.imagetool.gci.GCIFile;
+import com.kreative.imagetool.gif.GIFFile;
+import com.kreative.imagetool.smf.SMFFile;
 import com.kreative.imagetool.transform.Transform;
 import com.kreative.imagetool.transform.TransformParser;
 
@@ -191,7 +196,7 @@ public class ConvertAnimation {
 			if (image instanceof BufferedImage) {
 				return AnimationIO.fromImageArray((BufferedImage)image, o);
 			} else {
-				return ImageIO.toAnimation(image);
+				return AnimationIO.fromObject(image);
 			}
 		}
 	}
@@ -199,8 +204,21 @@ public class ConvertAnimation {
 	private static void writeFile(Animation a, String format, ArrayOptions o, int repeat, File output) throws IOException {
 		if (format.equalsIgnoreCase("d") || format.equalsIgnoreCase("dir") || format.equalsIgnoreCase("directory")) {
 			AnimationIO.toDirectory(a, output);
-		} else if (format.equalsIgnoreCase("gci") || format.equalsIgnoreCase("gif")) {
-			ImageIO.writeFile(a, format, output);
+		} else if (format.equalsIgnoreCase("gci")) {
+			GCIFile gci = AnimationIO.toGCIFile(a);
+			FileOutputStream out = new FileOutputStream(output);
+			gci.write(new DataOutputStream(out));
+			out.flush(); out.close();
+		} else if (format.equalsIgnoreCase("gif")) {
+			GIFFile gif = AnimationIO.toGIFFile(a, repeat);
+			FileOutputStream out = new FileOutputStream(output);
+			gif.write(new DataOutputStream(out));
+			out.flush(); out.close();
+		} else if (format.equalsIgnoreCase("smf")) {
+			SMFFile smf = AnimationIO.toSMFFile(a, repeat != 1);
+			FileOutputStream out = new FileOutputStream(output);
+			smf.write(new DataOutputStream(out));
+			out.flush(); out.close();
 		} else {
 			BufferedImage image = AnimationIO.toImageArray(a, null, o);
 			ImageIO.writeFile(image, format, output);

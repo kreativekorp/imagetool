@@ -8,6 +8,10 @@ import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFBlock;
 import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.gif.GIFImageDescriptor;
+import com.kreative.imagetool.smf.SMFDirective;
+import com.kreative.imagetool.smf.SMFFile;
+import com.kreative.imagetool.smf.SMFFillDirective;
+import com.kreative.imagetool.smf.SMFPushDirective;
 
 public abstract class ColorFilter implements Transform {
 	public abstract int transform(int pixel);
@@ -49,6 +53,19 @@ public abstract class ColorFilter implements Transform {
 			}
 		}
 		return gif;
+	}
+	
+	public SMFFile transform(SMFFile smf) {
+		for (SMFDirective dir : smf.directives) {
+			if (dir instanceof SMFFillDirective) {
+				SMFFillDirective f = (SMFFillDirective)dir;
+				f.color = transform(f.color);
+			} else if (dir instanceof SMFPushDirective) {
+				SMFPushDirective p = (SMFPushDirective)dir;
+				p.setImage(transform(p.getImage()));
+			}
+		}
+		return smf;
 	}
 	
 	public Animation transform(Animation a) {

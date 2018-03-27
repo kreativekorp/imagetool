@@ -9,6 +9,11 @@ import com.kreative.imagetool.gci.GCIFile;
 import com.kreative.imagetool.gif.GIFBlock;
 import com.kreative.imagetool.gif.GIFFile;
 import com.kreative.imagetool.gif.GIFImageDescriptor;
+import com.kreative.imagetool.smf.SMFAllocateDirective;
+import com.kreative.imagetool.smf.SMFDirective;
+import com.kreative.imagetool.smf.SMFFile;
+import com.kreative.imagetool.smf.SMFFillDirective;
+import com.kreative.imagetool.smf.SMFPushDirective;
 
 public class FlipHorizontal implements Transform {
 	public BufferedImage transform(BufferedImage image) {
@@ -60,6 +65,24 @@ public class FlipHorizontal implements Transform {
 			}
 		}
 		return gif;
+	}
+	
+	public SMFFile transform(SMFFile smf) {
+		int smfWidth = 128;
+		for (SMFDirective dir : smf.directives) {
+			if (dir instanceof SMFAllocateDirective) {
+				SMFAllocateDirective a = (SMFAllocateDirective)dir;
+				smfWidth = a.width;
+			} else if (dir instanceof SMFFillDirective) {
+				SMFFillDirective f = (SMFFillDirective)dir;
+				f.x = smfWidth - f.x - f.width;
+			} else if (dir instanceof SMFPushDirective) {
+				SMFPushDirective p = (SMFPushDirective)dir;
+				p.setImage(transform(p.getImage()));
+				p.x = smfWidth - p.x - p.width;
+			}
+		}
+		return smf;
 	}
 	
 	public Animation transform(Animation a) {
