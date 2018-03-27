@@ -10,7 +10,6 @@ public class TransformParser implements SwingConstants {
 		System.out.println("-b, --backgroundcolor <color>");
 		System.out.println("    Renders the image on top of the specified background color.");
 		System.out.println("    <Color> must be a string of 3, 4, 6, or 8 hexadecimal digits.");
-		System.out.println("    (Not currently supported for GIFs.)");
 		System.out.println("-c, --canvassize <width> <height> <anchor>");
 		System.out.println("    Changes the width and height of the image without scaling the image.");
 		System.out.println("    <Anchor> is NW, N, NE, E, SE, S, SW, W, or CENTER.");

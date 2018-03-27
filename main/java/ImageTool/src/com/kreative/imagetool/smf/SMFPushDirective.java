@@ -55,14 +55,14 @@ public class SMFPushDirective implements SMFDirective {
 	public int write(DataOutput out) throws IOException {
 		int len;
 		if (x < 256 && y < 256 && width < 256 && height < 256) {
-			out.writeByte('F');
+			out.writeByte('P');
 			out.writeByte((x > 0) ? x : 0);
 			out.writeByte((y > 0) ? y : 0);
 			out.writeByte((width > 0) ? width : 0);
 			out.writeByte((height > 0) ? height : 0);
 			len = 5;
 		} else {
-			out.writeByte('f');
+			out.writeByte('p');
 			out.writeShort((x < 65535) ? x : 65535);
 			out.writeShort((y < 65535) ? y : 65535);
 			out.writeShort((width < 65535) ? width : 65535);
