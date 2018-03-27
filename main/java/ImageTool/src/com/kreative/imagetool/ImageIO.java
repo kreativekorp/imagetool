@@ -73,7 +73,7 @@ public class ImageIO {
 			return gif;
 		} else if (image instanceof SMFFile) {
 			SMFFile smf = (SMFFile)image;
-			// TODO for (Transform tx : txs) smf = tx.transform(smf);
+			for (Transform tx : txs) smf = tx.transform(smf);
 			return smf;
 		} else {
 			return null;
