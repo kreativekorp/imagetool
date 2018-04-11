@@ -54,6 +54,7 @@ public class LED64 {
 				frame <<= 1;
 			}
 		}
+		g.dispose();
 		return img;
 	}
 	
