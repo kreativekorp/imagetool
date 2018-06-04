@@ -77,6 +77,10 @@ public class ConvertAnimation {
 		System.out.println("-f, --format <format>");
 		System.out.println("    Specifies the output format of the converted animation.");
 		System.out.println("    Default is \"d\" for a directory of still frames.");
+		System.out.println("-gct, --globalcolortable");
+		System.out.println("    Use a single global color table (for animated GIFs).");
+		System.out.println("-lct, --localcolortable");
+		System.out.println("    Use a local color table per frame (for animated GIFs).");
 		System.out.println("-n, --loopcount <count>");
 		System.out.println("    Specifies the number of times an animation loops (for animated GIFs).");
 		System.out.println("-o, --output <path>");
@@ -95,6 +99,7 @@ public class ConvertAnimation {
 		public String outputFormat = "d";
 		public ArrayOptions outputOptions = new ArrayOptions();
 		public int outputRepeat = 0;
+		public boolean outputUseLocalPalette = false;
 		public File outputFile = null;
 		public String parseError = null;
 		
@@ -127,6 +132,12 @@ public class ConvertAnimation {
 				} else if (args[i].equals("-n") || args[i].equalsIgnoreCase("--loopcount")) {
 					outputRepeat = Integer.parseInt(args[i + 1]);
 					return i + 2;
+				} else if (args[i].equals("-lct") || args[i].equalsIgnoreCase("--localcolortable")) {
+					outputUseLocalPalette = true;
+					return i + 1;
+				} else if (args[i].equals("-gct") || args[i].equalsIgnoreCase("--globalcolortable")) {
+					outputUseLocalPalette = false;
+					return i + 1;
 				} else if (args[i].equals("-o") || args[i].equalsIgnoreCase("--output")) {
 					outputFile = new File(args[i + 1]);
 					return i + 2;
@@ -166,7 +177,7 @@ public class ConvertAnimation {
 					a = tx.transform(a);
 				}
 			}
-			writeFile(a, outputFormat, outputOptions, outputRepeat, outputFile(inputFile));
+			writeFile(a, outputFormat, outputOptions, outputRepeat, outputUseLocalPalette, outputFile(inputFile));
 		}
 		
 		private File outputFile(File inputFile) {
@@ -201,7 +212,7 @@ public class ConvertAnimation {
 		}
 	}
 	
-	private static void writeFile(Animation a, String format, ArrayOptions o, int repeat, File output) throws IOException {
+	private static void writeFile(Animation a, String format, ArrayOptions o, int repeat, boolean useLocalPalette, File output) throws IOException {
 		if (format.equalsIgnoreCase("d") || format.equalsIgnoreCase("dir") || format.equalsIgnoreCase("directory")) {
 			AnimationIO.toDirectory(a, output);
 		} else if (format.equalsIgnoreCase("gci")) {
@@ -210,7 +221,7 @@ public class ConvertAnimation {
 			gci.write(new DataOutputStream(out));
 			out.flush(); out.close();
 		} else if (format.equalsIgnoreCase("gif")) {
-			GIFFile gif = AnimationIO.toGIFFile(a, repeat);
+			GIFFile gif = AnimationIO.toGIFFile(a, repeat, useLocalPalette);
 			FileOutputStream out = new FileOutputStream(output);
 			gif.write(new DataOutputStream(out));
 			out.flush(); out.close();

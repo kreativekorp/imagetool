@@ -91,7 +91,7 @@ public class ImageIO {
 		} else if (format.equalsIgnoreCase("gif")) {
 			GIFFile gif;
 			if (image instanceof GIFFile) gif = (GIFFile)image;
-			else gif = AnimationIO.toGIFFile(AnimationIO.fromObject(image), 0);
+			else gif = AnimationIO.toGIFFile(AnimationIO.fromObject(image), 0, false);
 			FileOutputStream out = new FileOutputStream(output);
 			gif.write(new DataOutputStream(out));
 			out.flush(); out.close();

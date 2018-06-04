@@ -169,29 +169,32 @@ public class AnimationIO implements SwingConstants {
 		return gci;
 	}
 	
-	public static GIFFile toGIFFile(Animation a, int repeat) {
-		Histogram<Integer> h = new Histogram<Integer>();
-		int[] pixels = new int[a.width * a.height];
-		for (AnimationFrame frame : a.frames) {
-			frame.image.getRGB(0, 0, a.width, a.height, pixels, 0, a.width);
-			for (int p : pixels) if (p < 0) h.add(p | 0xFF000000);
-		}
-		List<Integer> palette = h.toList();
-		Collections.sort(palette, h.byCount(true));
-		int s0 = Math.min(palette.size(), 255);
-		int[] p0 = new int[s0 + 1];
-		for (int i = 0; i < s0; i++) {
-			p0[i] = palette.get(i);
-		}
-		
+	public static GIFFile toGIFFile(Animation a, int repeat, boolean useLocalPalette) {
 		GIFFile gif = new GIFFile();
 		gif.version89a = true;
 		gif.width = a.width;
 		gif.height = a.height;
-		gif.depth = log(s0 + 1);
-		gif.palette = p0;
-		gif.paletteSorted = true;
-		gif.backgroundIndex = s0;
+		
+		if (!useLocalPalette) {
+			Histogram<Integer> h = new Histogram<Integer>();
+			int[] pixels = new int[a.width * a.height];
+			for (AnimationFrame frame : a.frames) {
+				frame.image.getRGB(0, 0, a.width, a.height, pixels, 0, a.width);
+				for (int p : pixels) if (p < 0) h.add(p | 0xFF000000);
+			}
+			List<Integer> palette = h.toList();
+			Collections.sort(palette, h.byCount(true));
+			int s0 = Math.min(palette.size(), 255);
+			int[] p0 = new int[s0 + 1];
+			for (int i = 0; i < s0; i++) {
+				p0[i] = palette.get(i);
+			}
+			
+			gif.depth = log(s0 + 1);
+			gif.palette = p0;
+			gif.paletteSorted = true;
+			gif.backgroundIndex = s0;
+		}
 		
 		GIFApplicationExtension nab = new GIFApplicationExtension();
 		nab.setRepeatCount(repeat);
@@ -206,12 +209,33 @@ public class AnimationIO implements SwingConstants {
 			gce.disposalMethod = GIFDisposalMethod.RESTORE_TO_BACKGROUND;
 			gce.delayTime = (int)Math.round(frame.duration * 100);
 			gce.transparency = true;
-			gce.transparencyIndex = s0;
 			
 			GIFImageDescriptor gid = new GIFImageDescriptor();
 			gid.left = margin.left;
 			gid.top = margin.top;
-			gid.minKeySize = GIFImageDescriptor.bestMinKeySize(s0 + 1);
+			
+			if (useLocalPalette) {
+				Histogram<Integer> h = new Histogram<Integer>();
+				int[] pixels = new int[a.width * a.height];
+				frame.image.getRGB(0, 0, a.width, a.height, pixels, 0, a.width);
+				for (int p : pixels) if (p < 0) h.add(p | 0xFF000000);
+				List<Integer> palette = h.toList();
+				Collections.sort(palette, h.byCount(true));
+				int s0 = Math.min(palette.size(), 255);
+				int[] p0 = new int[s0 + 1];
+				for (int i = 0; i < s0; i++) {
+					p0[i] = palette.get(i);
+				}
+				
+				gce.transparencyIndex = s0;
+				gid.palette = p0;
+				gid.paletteSorted = true;
+				gid.minKeySize = GIFImageDescriptor.bestMinKeySize(s0 + 1);
+			} else {
+				gce.transparencyIndex = gif.backgroundIndex;
+				gid.minKeySize = GIFImageDescriptor.bestMinKeySize(gif.backgroundIndex + 1);
+			}
+			
 			try { gid.setImage(gif, gce, image); }
 			catch (IOException e) { continue; }
 			

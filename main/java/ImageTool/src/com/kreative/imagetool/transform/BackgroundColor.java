@@ -39,7 +39,7 @@ public class BackgroundColor implements Transform {
 	
 	public GIFFile transform(GIFFile gif) {
 		Animation a = transform(AnimationIO.fromGIFFile(gif));
-		return AnimationIO.toGIFFile(a, gif.getRepeatCount());
+		return AnimationIO.toGIFFile(a, gif.getRepeatCount(), gif.palette == null);
 	}
 	
 	public SMFFile transform(SMFFile smf) {
