@@ -255,6 +255,14 @@ public class STCFile implements List<STCEntry> {
 		for (STCFileListener l : listeners) l.stcSelectionChanged(this);
 	}
 	
+	public void addSTCFileListener(STCFileListener listener) {
+		this.listeners.add(listener);
+	}
+	
+	public void removeSTCFileListener(STCFileListener listener) {
+		this.listeners.remove(listener);
+	}
+	
 	public void read(DataInput in) throws IOException {
 		int count = in.readUnsignedShort();
 		/* start = */ in.readUnsignedShort();

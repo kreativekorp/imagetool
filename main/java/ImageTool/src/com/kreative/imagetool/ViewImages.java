@@ -8,6 +8,7 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import com.kreative.imagetool.animation.Animation;
 import com.kreative.imagetool.animation.AnimationIO;
+import com.kreative.imagetool.animation.AnimationThread;
 
 public class ViewImages extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -74,24 +75,7 @@ public class ViewImages extends JFrame {
 			final Animation a = AnimationIO.fromObject(image);
 			final JLabel l = new JLabel(new ImageIcon(AnimationIO.toBufferedImage(a)));
 			setContentPane(new JScrollPane(l));
-			if (a.frames.size() > 1) {
-				(new Thread() {
-					int fc = 0;
-					public void run() {
-						while (!Thread.interrupted()) {
-							if (isVisible()) {
-								try {
-									l.setIcon(new ImageIcon(a.frames.get(fc).image));
-									Thread.sleep((long)(a.frames.get(fc).duration * 1000));
-									fc = (fc + 1) % a.frames.size();
-								} catch (InterruptedException e) {
-									break;
-								}
-							}
-						}
-					}
-				}).start();
-			}
+			if (a.frames.size() > 1) new AnimationThread(a, l).start();
 		}
 		pack();
 		setLocationRelativeTo(null);
