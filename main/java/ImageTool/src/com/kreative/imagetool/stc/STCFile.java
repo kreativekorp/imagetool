@@ -246,6 +246,20 @@ public class STCFile implements List<STCEntry> {
 		return entries.toArray(a);
 	}
 	
+	public String uniquePath(String prefix, String name, String suffix) {
+		String n = ((name.length() > 8) ? name.substring(0, 8) : name);
+		String path = prefix + n + suffix;
+		if (!containsPath(path)) return path;
+		for (int d = 1, e = 10, l = 7; l >= 0; d *= 10, e *= 10, l--) {
+			for (int i = d; i < e; i++) {
+				n = ((name.length() > l) ? name.substring(0, l) : name);
+				path = prefix + n + i + suffix;
+				if (!containsPath(path)) return path;
+			}
+		}
+		throw new IllegalStateException("The number of files is too damn high.");
+	}
+	
 	public STCSelection getSelection() {
 		return this.selection;
 	}

@@ -72,8 +72,8 @@ public class ViewImages extends JFrame {
 			JLabel l = new JLabel(new ImageIcon((BufferedImage)image));
 			setContentPane(new JScrollPane(l));
 		} else {
-			final Animation a = AnimationIO.fromObject(image);
-			final JLabel l = new JLabel(new ImageIcon(AnimationIO.toBufferedImage(a)));
+			Animation a = AnimationIO.fromObject(image);
+			JLabel l = new JLabel(new ImageIcon(AnimationIO.toBufferedImage(a)));
 			setContentPane(new JScrollPane(l));
 			if (a.frames.size() > 1) new AnimationThread(a, l).start();
 		}

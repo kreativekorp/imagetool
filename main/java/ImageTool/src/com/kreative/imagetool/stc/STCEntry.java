@@ -1,5 +1,7 @@
 package com.kreative.imagetool.stc;
 
+import java.io.File;
+
 public class STCEntry implements STCSelection {
 	private final String path;
 	private final String name;
@@ -15,6 +17,12 @@ public class STCEntry implements STCSelection {
 	
 	public String name() {
 		return name;
+	}
+	
+	public File file(File root) {
+		String[] p = path.split("/");
+		for (String n : p) root = new File(root, n);
+		return root;
 	}
 	
 	@Override
