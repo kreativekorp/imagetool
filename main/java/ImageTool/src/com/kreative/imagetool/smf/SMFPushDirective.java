@@ -128,6 +128,7 @@ public class SMFPushDirective implements SMFDirective {
 	}
 	
 	public BufferedImage getImage() {
+		if (width <= 0 || height <= 0) return null;
 		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		image.setRGB(0, 0, width, height, getRGB(), 0, width);
 		return image;

@@ -1,23 +1,27 @@
-SRCFILES := $(shell find src -name \*.java)
+SRCFILES := $(shell find src/com/kreative/imagetool -type f \! -path \*/.\* -name \*.java)
+RESFILES := $(shell find src/com/kreative/imagetool -type f \! -path \*/.\* \! -name \*.java | sed s/^src\\///)
 PACKAGES := $(shell find src/com/kreative/imagetool -type d \! -path \*/.\* | sed s/^src\\/// | tr / .)
 
-all: clean bin doc imagetool.jar imagetool-src.tgz
+all: clean bin doc imagetool.jar imagetool-src.tgz SpriteLoader.jar
 
-eclipseall: eclipseclean imagetool.jar imagetool-src.tgz
+eclipseall: eclipseclean imagetool.jar imagetool-src.tgz SpriteLoader.jar
 
 clean:
 	rm -rf bin
 	rm -rf doc
 	rm -rf imagetool*.jar
 	rm -rf imagetool*.tgz
+	rm -rf SpriteLoader.jar
 
 eclipseclean:
 	rm -rf imagetool*.jar
 	rm -rf imagetool*.tgz
+	rm -rf SpriteLoader.jar
 
 bin: src
 	mkdir -p bin
 	javac -sourcepath src $(SRCFILES) -d bin
+	$(foreach res,$(RESFILES),cp src/$(res) bin/$(res);)
 
 doc: src
 	mkdir -p doc
@@ -32,6 +36,11 @@ imagetool-src.tgz: src
 	export COPYFILE_DISABLE=true
 	find src -name .DS_Store -delete
 	tar -czf imagetool-src.tgz src/com/kreative
+
+SpriteLoader.jar: bin
+	export COPYFILE_DISABLE=true
+	find bin -name .DS_Store -delete
+	jar cmf dep/MANIFEST-SL.MF SpriteLoader.jar -C bin com/kreative
 
 install: imagetool.jar
 	sudo cp -f imagetool.jar /usr/local/lib/
