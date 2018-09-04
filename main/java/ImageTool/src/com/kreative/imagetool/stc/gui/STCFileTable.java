@@ -1,5 +1,6 @@
 package com.kreative.imagetool.stc.gui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FileDialog;
@@ -33,6 +34,7 @@ public class STCFileTable extends JTable {
 		this.stc = stc;
 		setModel(model = new STCFileTableModel(stc));
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		setGridColor(new Color(255, 255, 255, 0));
 		setIntercellSpacing(new Dimension(0,0));
 		setRowHeight(20);
 		setColumnWidth(0, 40);

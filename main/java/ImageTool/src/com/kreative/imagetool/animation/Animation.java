@@ -16,21 +16,25 @@ public class Animation {
 	
 	public Animation selectFrames(int... indices) {
 		Animation a = new Animation(width, height);
-		for (int i : indices) {
-			AnimationFrame frame = frames.get(i);
-			frame = new AnimationFrame(frame.image, frame.duration);
-			a.frames.add(frame);
-		}
+		for (int i : indices) a.frames.add(frames.get(i).copy());
 		return a;
 	}
 	
 	public Animation selectFrames(List<Integer> indices) {
 		Animation a = new Animation(width, height);
-		for (int i : indices) {
-			AnimationFrame frame = frames.get(i);
-			frame = new AnimationFrame(frame.image, frame.duration);
-			a.frames.add(frame);
-		}
+		for (int i : indices) a.frames.add(frames.get(i).copy());
+		return a;
+	}
+	
+	public Animation copy() {
+		Animation a = new Animation(width, height);
+		for (AnimationFrame f : frames) a.frames.add(f.copy());
+		return a;
+	}
+	
+	public Animation deepCopy() {
+		Animation a = new Animation(width, height);
+		for (AnimationFrame f : frames) a.frames.add(f.deepCopy());
 		return a;
 	}
 }
