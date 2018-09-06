@@ -13,33 +13,28 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import com.kreative.imagetool.stc.STCEntry;
 import com.kreative.imagetool.stc.STCFile;
 
 public class STCFilePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
-	private static final Image ADD_ICON;
-	private static final Image DELETE_ICON;
-	private static final Image UP_ICON;
-	private static final Image DOWN_ICON;
-	static {
-		Image addIcon = null;
-		Image deleteIcon = null;
-		Image upIcon = null;
-		Image downIcon = null;
-		try { addIcon = ImageIO.read(STCFilePanel.class.getResource("list-add.png")); } catch (IOException e) {}
-		try { deleteIcon = ImageIO.read(STCFilePanel.class.getResource("list-remove.png")); } catch (IOException e) {}
-		try { upIcon = ImageIO.read(STCFilePanel.class.getResource("go-up.png")); } catch (IOException e) {}
-		try { downIcon = ImageIO.read(STCFilePanel.class.getResource("go-down.png")); } catch (IOException e) {}
-		ADD_ICON = addIcon;
-		DELETE_ICON = deleteIcon;
-		UP_ICON = upIcon;
-		DOWN_ICON = downIcon;
+	private static Image icon(String name) {
+		try { return ImageIO.read(STCFilePanel.class.getResource(name)); }
+		catch (IOException e) { return null; }
 	}
+	
+	private static final Image ADD_ICON = icon("list-add.png");
+	private static final Image COPY_ICON = icon("edit-copy.png");
+	private static final Image EDIT_ICON = icon("tango_style_pencil.png");
+	private static final Image UP_ICON = icon("go-up.png");
+	private static final Image DOWN_ICON = icon("go-down.png");
+	private static final Image DELETE_ICON = icon("user-trash.png");
 	
 	public STCFilePanel(final File root, final File file, final STCFile stc) {
 		final STCFileNameField nf = new STCFileNameField(stc);
@@ -47,14 +42,18 @@ public class STCFilePanel extends JPanel {
 		final STCAnimationPanel ap = new STCAnimationPanel();
 		final JButton addFromLibBtn = new JButton("Add From Library...", new ImageIcon(ADD_ICON));
 		final JButton addFromFileBtn = new JButton("Add From File...", new ImageIcon(ADD_ICON));
-		final JButton deleteBtn = new JButton("Delete", new ImageIcon(DELETE_ICON));
+		final JButton copyBtn = new JButton("Duplicate", new ImageIcon(COPY_ICON));
+		final JButton editBtn = new JButton("Edit", new ImageIcon(EDIT_ICON));
 		final JButton moveUpBtn = new JButton("Move Up", new ImageIcon(UP_ICON));
 		final JButton moveDownBtn = new JButton("Move Down", new ImageIcon(DOWN_ICON));
+		final JButton deleteBtn = new JButton("Delete", new ImageIcon(DELETE_ICON));
 		addFromLibBtn.setHorizontalAlignment(JButton.LEADING);
 		addFromFileBtn.setHorizontalAlignment(JButton.LEADING);
-		deleteBtn.setHorizontalAlignment(JButton.LEADING);
+		copyBtn.setHorizontalAlignment(JButton.LEADING);
+		editBtn.setHorizontalAlignment(JButton.LEADING);
 		moveUpBtn.setHorizontalAlignment(JButton.LEADING);
 		moveDownBtn.setHorizontalAlignment(JButton.LEADING);
+		deleteBtn.setHorizontalAlignment(JButton.LEADING);
 		
 		JScrollPane jsp = new JScrollPane(
 			table,
@@ -73,9 +72,11 @@ public class STCFilePanel extends JPanel {
 		JPanel buttonPanel = new JPanel(new GridLayout(0,1,4,4));
 		buttonPanel.add(addFromLibBtn);
 		buttonPanel.add(addFromFileBtn);
-		buttonPanel.add(deleteBtn);
+		buttonPanel.add(copyBtn);
+		buttonPanel.add(editBtn);
 		buttonPanel.add(moveUpBtn);
 		buttonPanel.add(moveDownBtn);
+		buttonPanel.add(deleteBtn);
 		
 		JPanel rightPanel = new JPanel(new BorderLayout(8,8));
 		rightPanel.add(ap, BorderLayout.PAGE_START);
@@ -111,17 +112,21 @@ public class STCFilePanel extends JPanel {
 				if (e.getValueIsAdjusting()) return;
 				int index = table.getSelectedRow();
 				int count = stc.size();
-				deleteBtn.setEnabled(index >= 0 && index < count && count > 1);
+				copyBtn.setEnabled(index >= 0 && index < count);
+				editBtn.setEnabled(index >= 0 && index < count);
 				moveUpBtn.setEnabled(index > 0 && index < count);
 				moveDownBtn.setEnabled(index >= 0 && index < count - 1);
+				deleteBtn.setEnabled(index >= 0 && index < count && count > 1);
 			}
 		});
 		
 		int index = table.getSelectedRow();
 		int count = stc.size();
-		deleteBtn.setEnabled(index >= 0 && index < count && count > 1);
+		copyBtn.setEnabled(index >= 0 && index < count);
+		editBtn.setEnabled(index >= 0 && index < count);
 		moveUpBtn.setEnabled(index > 0 && index < count);
 		moveDownBtn.setEnabled(index >= 0 && index < count - 1);
+		deleteBtn.setEnabled(index >= 0 && index < count && count > 1);
 		
 		addFromFileBtn.addActionListener(new ActionListener() {
 			@Override
@@ -129,10 +134,44 @@ public class STCFilePanel extends JPanel {
 				table.addFile(null);
 			}
 		});
-		deleteBtn.addActionListener(new ActionListener() {
+		copyBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				table.deleteFile(false);
+				int index = table.getSelectedRow();
+				int count = stc.size();
+				if (index >= 0 && index < count) {
+					STCEntry oldEntry = stc.get(index);
+					STCEntry newEntry = table.addFile(oldEntry.file(root));
+					if (newEntry != null) {
+						stc.set(
+							stc.indexOf(newEntry),
+							new STCEntry(newEntry.path(), oldEntry.name())
+						);
+					}
+				}
+			}
+		});
+		editBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int index = table.getSelectedRow();
+				int count = stc.size();
+				if (index >= 0 && index < count) {
+					STCEntry entry = stc.get(index);
+					File file = entry.file(root);
+					try {
+						AnimationEditorFrame f = new AnimationEditorFrame(file, "smf");
+						f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+						f.setTitle(entry.name());
+						f.setVisible(true);
+					} catch (IOException ex) {
+						JOptionPane.showMessageDialog(
+							STCFilePanel.this,
+							"Could not open Ò" + file.getName() + "Ó.",
+							"Edit", JOptionPane.ERROR_MESSAGE
+						);
+					}
+				}
 			}
 		});
 		moveUpBtn.addActionListener(new ActionListener() {
@@ -145,6 +184,12 @@ public class STCFilePanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				table.moveDown((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+			}
+		});
+		deleteBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				table.deleteFile(false);
 			}
 		});
 		

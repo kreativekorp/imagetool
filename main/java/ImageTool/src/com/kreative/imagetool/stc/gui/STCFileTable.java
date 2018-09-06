@@ -92,11 +92,11 @@ public class STCFileTable extends JTable {
 		});
 	}
 	
-	public void addFile(File file) {
+	public STCEntry addFile(File file) {
 		if (file == null) {
 			FileDialog fd = new FileDialog(getParentFrame(), "Add", FileDialog.LOAD);
 			fd.setVisible(true);
-			if (fd.getDirectory() == null || fd.getFile() == null) return;
+			if (fd.getDirectory() == null || fd.getFile() == null) return null;
 			file = new File(fd.getDirectory(), fd.getFile());
 		}
 		try {
@@ -119,11 +119,13 @@ public class STCFileTable extends JTable {
 			else index = count;
 			stc.add(index, entry);
 			getSelectionModel().setSelectionInterval(index, index);
+			return entry;
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(
 				this, "Could not add Ò" + file.getName() + "Ó.",
 				"Add", JOptionPane.ERROR_MESSAGE
 			);
+			return null;
 		}
 	}
 	
