@@ -351,14 +351,19 @@ public class STCFile implements List<STCEntry> {
 	private static String readString(DataInput in, int length) throws IOException {
 		byte[] buf = new byte[length];
 		in.readFully(buf, 0, length);
-		while (length > 0 && buf[length - 1] == 0) length--;
-		return new String(buf, 0, length, "CP1252");
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < length && buf[i] != 0; i++) {
+			sb.append((char)SuperLatin.fromSuperLatin(buf[i]));
+		}
+		return sb.toString();
 	}
 	
 	private static void writeString(DataOutput out, String s, int length) throws IOException {
 		byte[] dst = new byte[length];
-		byte[] src = s.getBytes("CP1252");
-		for (int i = 0; i < length && i < src.length; i++) dst[i] = src[i];
+		char[] src = s.toCharArray();
+		for (int i = 0; i < length && i < src.length; i++) {
+			dst[i] = (byte)SuperLatin.toSuperLatin(src[i]);
+		}
 		out.write(dst, 0, length);
 	}
 }
