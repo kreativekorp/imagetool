@@ -15,7 +15,7 @@ import com.kreative.imagetool.animation.AnimationFrame;
 
 public class FancyName {
 	private Font font;
-	private String name;
+	private String[] name;
 	private int onLength;
 	private int offLength;
 	private Color[] colors;
@@ -29,7 +29,7 @@ public class FancyName {
 			e.printStackTrace();
 			this.font = new Font("DJ Fancy", Font.PLAIN, 18);
 		}
-		this.name = name;
+		this.name = name.split("\r\n|\r|\n");
 		this.onLength = 2;
 		this.offLength = 1;
 		this.colors = new Color[]{
@@ -89,9 +89,13 @@ public class FancyName {
 		g.setColor(Color.white);
 		g.setFont(font);
 		FontMetrics fm = g.getFontMetrics();
-		int x = (128 - fm.stringWidth(name)) / 2;
-		int y = (128 - fm.getHeight()) / 2 + fm.getAscent() - 1;
-		g.drawString(name, x, y);
+		int h = fm.getHeight();
+		int y = (128 - h * name.length) / 2 + fm.getAscent() - 1;
+		for (String fragment : name) {
+			int x = (128 - fm.stringWidth(fragment)) / 2;
+			g.drawString(fragment, x, y);
+			y += h;
+		}
 		g.dispose();
 		return img;
 	}
@@ -106,7 +110,7 @@ public class FancyName {
 			} else if ((arg.equals("-s") || arg.equals("--size")) && i < args.length) {
 				fn.font = fn.font.deriveFont(Float.parseFloat(args[i++]));
 			} else if ((arg.equals("-n") || arg.equals("--name")) && i < args.length) {
-				fn.name = args[i++];
+				fn.name = args[i++].split("\r\n|\r|\n");
 			} else if ((arg.equals("-l") || arg.equals("--length")) && i < args.length) {
 				String[] ls = args[i++].replaceAll("[^0-9]+", " ").trim().split(" +", 2);
 				try { fn.onLength = (ls.length > 0) ? Integer.parseInt(ls[0]) : 1; }
