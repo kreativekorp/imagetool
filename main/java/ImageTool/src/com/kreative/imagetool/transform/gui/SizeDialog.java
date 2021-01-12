@@ -118,8 +118,8 @@ public class SizeDialog extends JDialog {
 	}
 	
 	public ScaleDouble showScaleDoubleDialog() {
-		this.width.setValue(100.0); this.width.setStepSize(0.01);
-		this.height.setValue(100.0); this.height.setStepSize(0.01);
+		this.width.setValue(100); this.width.setStepSize(1);
+		this.height.setValue(100); this.height.setStepSize(1);
 		this.widthUnitLabel.setText("%");
 		this.heightUnitLabel.setText("%");
 		this.anchorPanel.setVisible(false);

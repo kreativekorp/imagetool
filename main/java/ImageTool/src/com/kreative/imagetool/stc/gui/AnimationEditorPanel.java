@@ -99,7 +99,7 @@ public class AnimationEditorPanel extends JPanel {
 					String fileName = AnimationEditorPanel.this.file.getName();
 					JOptionPane.showMessageDialog(
 						AnimationEditorPanel.this,
-						"Could not save Ò" + fileName + "Ó.",
+						"Could not save \u201C" + fileName + "\u201D.",
 						"Save", JOptionPane.ERROR_MESSAGE
 					);
 					return false;

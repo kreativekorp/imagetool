@@ -122,7 +122,7 @@ public class STCFileTable extends JTable {
 			return entry;
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(
-				this, "Could not add Ò" + file.getName() + "Ó.",
+				this, "Could not add \u201C" + file.getName() + "\u201D.",
 				"Add", JOptionPane.ERROR_MESSAGE
 			);
 			return null;
@@ -137,7 +137,7 @@ public class STCFileTable extends JTable {
 			if (
 				force ||
 				JOptionPane.showConfirmDialog(
-					this, "Are you sure you want to delete Ò" + e.name() + "Ó?",
+					this, "Are you sure you want to delete \u201C" + e.name() + "\u201D?",
 					"Delete", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE
 				) == JOptionPane.YES_OPTION
 			) {
@@ -145,7 +145,7 @@ public class STCFileTable extends JTable {
 					stc.remove(index);
 				} else {
 					JOptionPane.showMessageDialog(
-						this, "Could not delete Ò" + e.name() + "Ó.",
+						this, "Could not delete \u201C" + e.name() + "\u201D.",
 						"Delete", JOptionPane.ERROR_MESSAGE
 					);
 				}

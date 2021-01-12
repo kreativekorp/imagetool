@@ -167,7 +167,7 @@ public class STCFilePanel extends JPanel {
 					} catch (IOException ex) {
 						JOptionPane.showMessageDialog(
 							STCFilePanel.this,
-							"Could not open Ò" + file.getName() + "Ó.",
+							"Could not open \u201C" + file.getName() + "\u201D.",
 							"Edit", JOptionPane.ERROR_MESSAGE
 						);
 					}
