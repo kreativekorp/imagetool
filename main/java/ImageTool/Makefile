@@ -31,6 +31,7 @@ imagetool.jar: bin
 	export COPYFILE_DISABLE=true
 	find bin -name .DS_Store -delete
 	jar cmf dep/MANIFEST.MF imagetool.jar -C bin com/kreative
+	chmod +x imagetool.jar
 
 imagetool-src.tgz: src
 	export COPYFILE_DISABLE=true
@@ -41,6 +42,7 @@ SpriteLoader.jar: bin
 	export COPYFILE_DISABLE=true
 	find bin -name .DS_Store -delete
 	jar cmf dep/MANIFEST-SL.MF SpriteLoader.jar -C bin com/kreative
+	chmod +x SpriteLoader.jar
 
 install: imagetool.jar
 	sudo cp -f imagetool.jar /usr/local/lib/
