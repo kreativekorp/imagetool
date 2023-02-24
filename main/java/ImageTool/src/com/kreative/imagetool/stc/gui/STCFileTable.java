@@ -25,6 +25,13 @@ import com.kreative.imagetool.stc.STCFileListener;
 public class STCFileTable extends JTable {
 	private static final long serialVersionUID = 1L;
 	
+	private static final String[] timeSettings = {
+		 "5s", "10s", "15s", "20s", "25s", "30s",
+		"35s", "40s", "45s", "50s", "55s", "60s"
+	};
+	
+	private static String lastOpenDirectory = null;
+	
 	private final File root;
 	private final STCFile stc;
 	private final STCFileTableModel model;
@@ -40,10 +47,7 @@ public class STCFileTable extends JTable {
 		setColumnWidth(0, 40);
 		setColumnWidth(2, 60);
 		getColumnModel().getColumn(2).setCellEditor(
-			new DefaultCellEditor(new JComboBox(new String[] {
-				 "5s", "10s", "15s", "20s", "25s", "30s",
-				"35s", "40s", "45s", "50s", "55s", "60s"
-			}))
+			new DefaultCellEditor(new JComboBox(timeSettings))
 		);
 		
 		stc.addSTCFileListener(new STCFileListener() {
@@ -94,10 +98,17 @@ public class STCFileTable extends JTable {
 	
 	public STCEntry addFile(File file) {
 		if (file == null) {
-			FileDialog fd = new FileDialog(getParentFrame(), "Add", FileDialog.LOAD);
+			Frame frame = getParentFrame();
+			boolean newFrame = (frame == null);
+			if (newFrame) frame = new Frame();
+			FileDialog fd = new FileDialog(frame, "Add", FileDialog.LOAD);
+			if (lastOpenDirectory != null) fd.setDirectory(lastOpenDirectory);
 			fd.setVisible(true);
-			if (fd.getDirectory() == null || fd.getFile() == null) return null;
-			file = new File(fd.getDirectory(), fd.getFile());
+			String ds = fd.getDirectory(), fs = fd.getFile();
+			fd.dispose();
+			if (newFrame) frame.dispose();
+			if (ds == null || fs == null) return null;
+			file = new File((lastOpenDirectory = ds), fs);
 		}
 		try {
 			Object image = ImageIO.readFile(file);
@@ -183,7 +194,7 @@ public class STCFileTable extends JTable {
 	private Frame getParentFrame() {
 		Component c = this;
 		while (true) {
-			if (c == null) return new Frame();
+			if (c == null) return null;
 			if (c instanceof Frame) return (Frame)c;
 			c = c.getParent();
 		}
